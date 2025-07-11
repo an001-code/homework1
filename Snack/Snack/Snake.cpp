@@ -6,17 +6,17 @@ using namespace std;
 #include<time.h>
 #include<conio.h>
 
-//¶¨Òå³¡¾°´óÐ¡
+//?????????
 #define WIDTH 1040
 #define HEIGHT 640
-//¶¨ÒåÊ³ÎïÒÔ¼°ÉßµÄ´óÐ¡
+//???????????????
 #define SIZE  20
-//¶¨ÒåÉßµÄ³¯Ïò
+//??????????
 #define UP 1
 #define DOWN -1
 #define LEFT 2
 #define RIGHT -2
-//ÉßµÄ×î´ó³¤¶È
+//???????
 #define MAXLEN 1600
 
 
@@ -25,45 +25,45 @@ typedef struct {
 	int y;
 }SnakeNode;
 
-SnakeNode tmp[MAXLEN];	//ÓÃÁíÍâÒ»¸öÊý×éÀ´´æ´¢ÉßÔ­À´µÄÎ»ÖÃ
-int speed = 150;		//ÉßµÄËÙ¶È(ÓÃÔÚË¯Ãßº¯ÊýÀïÃæ)
-IMAGE wallImage;       //±ß½çÇ½
-int score=0;	       //·ÖÊý
-int difficulty_level = 0;//Ñ¡ÔñÄÑ¶È£¬Ä¬ÈÏÎªÁã£¨¼òµ¥£©
-ExMessage msg;     //Êó±êÐÅÏ¢
+SnakeNode tmp[MAXLEN];	//???????????????????????????
+int speed = 150;		//??????(??????????????)
+IMAGE wallImage;       //????
+int score=0;	       //????
+int difficulty_level = 0;//????????????????
+ExMessage msg;     //??????
 
 
-//´´½¨ÉßµÄÀà
+//?????????
 class Snake
 {
 	friend class Food;
 	friend class Wall;
 public:
-	Snake();					//³õÊ¼»¯
-	void Move();				//ÒÆ¶¯
-	void Draw();				//»æÖÆÉß
-	bool Eat(Food food);	    //³ÔÊ³Îï
-	bool Defeat(Wall wall);	//Ê§°ÜÅÐ¶¨
+	Snake();					//?????
+	void Move();				//???
+	void Draw();				//??????
+	bool Eat(Food food);	    //?????
+	bool Defeat(Wall wall);	//??????
 	
 private:
-	int dirt;					//³¯Ïò
-	int length;					//³¤¶È
-	SnakeNode node[MAXLEN];		//ÉßµÄ½áµã
-	IMAGE ima1, ima2, ima3, ima4, ima5;//ÉßµÄÍ¼Æ¬
+	int dirt;					//????
+	int length;					//????
+	SnakeNode node[MAXLEN];		//?????
+	IMAGE ima1, ima2, ima3, ima4, ima5;//?????
 };
 
-//´´½¨Ê³ÎïµÄÀà
+//??????????
 class Food
 {
 	friend class Snake;
 	friend class Wall;
 public:
-	Food(Snake snake);			//Ê³Îï³õÊ¼»¯
-	void Draw();				//»æÖÆÊ³Îï
+	Food(Snake snake);			//???????
+	void Draw();				//???????
 private:
-	int x, y;					//×ø±ê
+	int x, y;					//????
 	IMAGE foodImage;
-	int food_kind;//Ê³ÎïÖÖÀà£¬1-3Îª¼õËÙÊ³Îï£¬4-9ÎªÆÕÍ¨Ê³Îï£¬10-12Îª¼ÓÊýÊ³Îï£»
+	int food_kind;//???????1-3????????4-9???????10-12????????
 };
 
 class Wall
@@ -94,22 +94,22 @@ void initWall()
 }
 void printMessage()
 {
-	char message1[] = "Äãµ±Ç°µÄ·ÖÊýÎª£º";
+	char message1[] = "???????????";
 	outtextxy(WIDTH-240,20, message1);
 	char s1[6];
 	sprintf(s1, "%d", score);
-	outtextxy(WIDTH - 120,20, s1);//´òÓ¡·ÖÊý
+	outtextxy(WIDTH - 120,20, s1);//???????
 
-	char message2[] = "ÇàÉßµ±Ç°µÄËÙ¶ÈÎª£º";
+	char message2[] = "??????????????";
 	outtextxy(WIDTH - 240, 40, message2);
 	char s2[6];
-	int _speed = 300 - speed;//×ª»¯ËÙ¶È
+	int _speed = 300 - speed;//??????
 	sprintf(s2, "%d", _speed);
-	outtextxy(WIDTH - 120, 40, s2);//´òÓ¡ËÙ¶È
-	//´òÓ¡Ïà¹ØËµÃ÷
-	char message3[] = "¿ÉÑ¡ÔñÄÑ¶È£¨Ä¬ÈÏÎª¼òµ¥£©£º";
+	outtextxy(WIDTH - 120, 40, s2);//??????
+	//?????????
+	char message3[] = "??????????????????";
 	outtextxy(WIDTH - 240, 60, message3);
-	char message4[] = "¼òµ¥"; char message5[] = "À§ÄÑ"; char message6[] = "Á¶Óü";
+	char message4[] = "??"; char message5[] = "????"; char message6[] = "????";
 	outtextxy(WIDTH - 180, 80, message4);
 	outtextxy(WIDTH - 180, 100, message5);
 	outtextxy(WIDTH - 180, 120, message6);
@@ -154,9 +154,9 @@ table2:
 	while (1) {
 		BeginBatchDraw();
 		FlushBatchDraw();
-		while (peekmessage(&msg, EX_MOUSE))//»ñÈ¡Êó±êÐÅÏ¢
+		while (peekmessage(&msg, EX_MOUSE))//?????????
 		{
-			if (botton()) goto table2;//ÅÐ¶ÏÊó±êµã»÷´¦ÊÇ·ñÊÇ°´¼ü
+			if (botton()) goto table2;//??????????????????
 		}
 		snake.Draw();
 		food.Draw();  
@@ -164,7 +164,7 @@ table2:
 	    wall.Draw();   
 		printMessage(); 
 		FlushBatchDraw();
-		EndBatchDraw();//Ë«»º³å£¬·ÀÖ¹ÆÁÄ»Ò»ÉÁÒ»ÉÁµÄ
+		EndBatchDraw();//???????????????????
 		if (snake.Eat(food)) {
 			goto table1;
 		}
@@ -173,19 +173,19 @@ table2:
 		}
 		snake.Move(); 
 	}
-	//ÌáÊ¾Ê§°ÜÐÅÏ¢
+	//?????????
 	HWND window = GetHWnd();
-	SetWindowText(window, _T("ÌáÊ¾"));
-	MessageBox(window, _T("ÓÎÏ·Ê§°Ü"), _T("ÌáÊ¾"), MB_OKCANCEL);
+	SetWindowText(window, _T("???"));
+	MessageBox(window, _T("??????"), _T("???"), MB_OKCANCEL);
 	return 0;
 }
 
-//ÉßµÄ³õÊ¼»¯
+//???????
 Snake::Snake()
 {
 	this->dirt = RIGHT;
 	this->length = 3;
-	//ÏÂ±êÊÇ0µÄÎ»ÖÃÎªÉßµÄÍ·²¿
+	//?±???0????????????
 	for (int i = 0; i < length; i++) {
 		this->node[i].x = 60 - ((i + 1) * SIZE);
 		this->node[i].y = 0;
@@ -197,16 +197,16 @@ Snake::Snake()
 	loadimage(&ima5, "snakeTail.png", SIZE, SIZE);
 }
 
-//ÒÆ¶¯
+//???
 void Snake::Move() {
-	//½«Ô­À´µÄÉß½áµã¿½±´Ò»·Ý
+	//????????????????
 	for (int i = 0; i < this->length; i++) {
 		tmp[i].x = this->node[i].x;
 		tmp[i].y = this->node[i].y;
 	}
-	int status = 0;//ÓÃÀ´ÅÐ¶ÏÊÇ·ñµã»÷ÁË×ªÏò°´¼ü
+	int status = 0;//??????????????????
 	if (this->dirt == RIGHT) {
-		//ÅÐ¶ÏÊÇ·ñ×ªÏò
+		//?????????
 		if (GetAsyncKeyState('W') && status == 0) {
 			//this->node[0].y -= SIZE;
 			this->dirt = UP;
@@ -221,7 +221,7 @@ void Snake::Move() {
 		}
 	}
 	if (this->dirt == DOWN) {
-		//ÅÐ¶ÏÊÇ·ñ×ªÏò
+		//?????????
 		if (GetAsyncKeyState('A') && status == 0) {
 			//this->node[0].x -= SIZE;
 			this->dirt = LEFT;
@@ -237,7 +237,7 @@ void Snake::Move() {
 		}
 	}
 	if (this->dirt == LEFT) {
-		//ÅÐ¶ÏÊÇ·ñ×ªÏò
+		//?????????
 		if (GetAsyncKeyState('W') && status == 0) {
 			//this->node[0].y -= SIZE;
 			this->dirt = UP;
@@ -253,7 +253,7 @@ void Snake::Move() {
 		}
 	}
 	if (this->dirt == UP) {
-		//ÅÐ¶ÏÊÇ·ñ×ªÏò
+		//?????????
 		if (GetAsyncKeyState('A') && status == 0) {
 			this->node[0].x -= SIZE;
 			this->dirt = LEFT;
@@ -268,7 +268,7 @@ void Snake::Move() {
 			this->node[0].y -= SIZE;
 		}
 	}
-	//ÒÆ¶¯
+	//???
 	for (int i = 1; i < this->length; i++) {
 		this->node[i].x = tmp[i - 1].x;
 		this->node[i].y = tmp[i - 1].y;
@@ -276,9 +276,9 @@ void Snake::Move() {
 	Sleep(speed);
 }
 
-//»æÖÆÉß
+//??????
 void Snake::Draw() {
-	cleardevice();//Çå¿ÕÔ­ÏÈµÄ»æÍ¼
+	cleardevice();//?????????
 	for (int i = 0; i < this->length; i++) {
 		if (i == 0) {
 			if (this->dirt == UP) { putimage(this->node[i].x, this->node[i].y, &ima1); }
@@ -295,7 +295,7 @@ void Snake::Draw() {
 
 
 
-//³ÔÊ³Îï
+//?????
 bool Snake::Eat(Food food) {
 	if (food.x == this->node[0].x && food.y == this->node[0].y) {
 		if (food.food_kind >=9 ) { 
@@ -331,19 +331,19 @@ bool Snake::Eat(Food food) {
 	return false;
 }
 
-//Ê§°ÜÅÐ¶¨
+//??????
 bool Snake::Defeat(Wall wall) {
-	//1.Åöµ½±ß½ç
+	//1.???????
 	if (this->node[0].x < 0 || this->node[0].x >= WIDTH-280 || this->node[0].y < 0 || this->node[0].y >= HEIGHT) {
 		return true;
 	}
-	//2.Åöµ½×Ô¼ºµÄÉíÌå
+	//2.?????????????
 	for (int i = 1; i < this->length; i++) {
 		if (this->node[0].x == this->node[i].x && this->node[0].y == this->node[i].y) {
 			return true;
 		}
 	}
-	//3.Åöµ½ÕÏ°­Îï
+	//3.?????????
 	if (difficulty_level)
 	{
 		for (int i = 0; i < wall.num-1; i++) {
@@ -355,7 +355,7 @@ bool Snake::Defeat(Wall wall) {
 	return false;
 }
 
-//Ê³ÎïµÄ³õÊ¼»¯
+//????????
 Food::Food(Snake snake)
 {
 	loadimage(&foodImage, "china.png", SIZE, SIZE);
@@ -369,44 +369,49 @@ table:
 			goto table;
 		}
 	}
-	this->food_kind = rand() % 12 + 1;//Éú³É²»Í¬ÖÖÀàµÄÊ³Îï
+	this->food_kind = rand() % 12 + 1;//??????????????
 }
 
-//»æÖÆÊ³Îï
+//???????
 void Food::Draw() {
 	putimage(this->x, this->y, &foodImage);
 }
 
-//³õÊ¼»¯ÕÏ°­Îï
-Wall::Wall(Snake snake,Food food)
-{
+//??????????
+Wall::Wall(Snake snake, Food food) {
 	this->num = difficulty_level * 10 + 1;
 
-	for (int i = 0; i < num-1; i++)
-	{
-	table3:
-		this->wallnode[i].x = (rand() % ((WIDTH - 280) / SIZE)) * SIZE;
-		this->wallnode[i].y = (rand() % (HEIGHT / SIZE)) * SIZE;
-		
-		for (int j = 0; j < snake.length; j++) {
-			if (snake.node[j].x == this->wallnode[i].x && snake.node[j].y == this->wallnode[i].y) {
-				goto table3;
-			}
-		}//±ÜÃâ³öÏÖÔÚÉßµÄÎ»ÖÃ
-		if (this->wallnode[i].x == food.x && this->wallnode[i].y == food.y) goto table3;//±ÜÃâ³öÏÖÔÚÊ³ÎïµÄÎ»ÖÃ
+	// ?????????????
+	if (difficulty_level >= 2) {
+		MazeGenerator mg(WIDTH - 280, HEIGHT, SIZE);
+		std::vector<SnakeNode> maze = mg.generate();
 
-		for (int p = 0; p < i; p++)
-		{
-			if (this->wallnode[p].x == this->wallnode[i].x && this->wallnode[p].y == this->wallnode[i].y) {
-				goto table3;
+		int i = 0;
+		for (auto& node : maze) {
+			if (i >= MAXLEN) break;
+			bool conflict = false;
+			for (int j = 0; j < snake.length; j++) {
+				if (snake.node[j].x == node.x && snake.node[j].y == node.y) {
+					conflict = true;
+					break;
+				}
 			}
-		}//±ÜÃâ³öÏÖÔÚÖ®Ç°Ç½µÄÎ»ÖÃ
+			if (node.x == food.x && node.y == food.y) conflict = true;
+
+			if (!conflict) {
+				wallnode[i++] = node;
+			}
+		}
+		num = i;
+	} else {
+		// ????
+		for (int i = 0; i < num - 1; i++) {
+			// ???????
+		}
 	}
-	
-	
 }
 
-//»æÖÆÕÏ°­Îï
+//?????????
 void Wall::Draw()
 {
 	for (int i = 0; i < num-1; i++)
