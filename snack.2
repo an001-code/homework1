@@ -1,0 +1,520 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <iostream>
+#include <stack>
+#include <vector>
+#include <algorithm>
+#include <random>
+using namespace std;
+#include <graphics.h>
+#include <stdlib.h>
+#include <time.h>
+#include <conio.h>
+
+// 定义场景大小
+#define WIDTH 1040
+#define HEIGHT 640
+// 定义食物以及蛇的大小
+#define SIZE 20
+// 定义蛇的朝向
+#define UP 1
+#define DOWN -1
+#define LEFT 2
+#define RIGHT -2
+// 蛇的最大长度
+#define MAXLEN 1600
+
+typedef struct {
+    int x;
+    int y;
+} SnakeNode;
+
+SnakeNode tmp[MAXLEN];    // 用另外一个数组来存储蛇原来的位置
+int speed = 150;        // 蛇的速度(用在睡眠函数里面)
+IMAGE wallImage;       // 边界墙
+int score = 0;           // 分数
+int difficulty_level = 0; // 选择难度，默认为零（简单）
+ExMessage msg;     // 鼠标信息
+
+// 创建蛇的类
+class Snake
+{
+    friend class Food;
+    friend class Wall;
+public:
+    Snake();                    // 初始化
+    void Move();                // 移动
+    void Draw();                // 绘制蛇
+    bool Eat(Food food);        // 吃食物
+    bool Defeat(Wall wall);    // 失败判定
+
+private:
+    int dirt;                    // 朝向
+    int length;                    // 长度
+    SnakeNode node[MAXLEN];        // 蛇的结点
+    IMAGE ima1, ima2, ima3, ima4, ima5;// 蛇的图片
+};
+
+// 创建食物的类
+class Food
+{
+    friend class Snake;
+    friend class Wall;
+public:
+    Food(Snake snake, Wall wall);    // 食物初始化
+    void Draw();                // 绘制食物
+private:
+    int x, y;                    // 坐标
+    IMAGE foodImage;
+    int food_kind;// 食物种类，1-3为减速食物，4-9为普通食物，10-12为加数食物；
+};
+
+class Wall
+{
+    friend class Snake;
+    friend class Food;
+public:
+    Wall(Snake snake);        // 构造函数修改为只接受蛇参数
+    void Draw();
+    void generateMaze();      // 迷宫生成函数
+private:
+    int num;
+    SnakeNode wallnode[MAXLEN];
+};
+
+void initWall()
+{
+    loadimage(&wallImage, "wall.png", SIZE, SIZE);
+    int wall_x = WIDTH - 260;
+    int wall_y = 0;
+    while (wall_y <= HEIGHT)
+    {
+        putimage(wall_x, wall_y, &wallImage);
+        wall_y += 20;
+    }
+}
+
+void printMessage()
+{
+    char message1[] = "你当前的分数为：";
+    outtextxy(WIDTH - 240, 20, message1);
+    char s1[6];
+    sprintf(s1, "%d", score);
+    outtextxy(WIDTH - 120, 20, s1);// 打印分数
+
+    char message2[] = "青蛇当前的速度为：";
+    outtextxy(WIDTH - 240, 40, message2);
+    char s2[6];
+    int _speed = 300 - speed;// 转化速度
+    sprintf(s2, "%d", _speed);
+    outtextxy(WIDTH - 120, 40, s2);// 打印速度
+    // 打印相关说明
+    char message3[] = "可选择难度（默认为简单）：";
+    outtextxy(WIDTH - 240, 60, message3);
+    char message4[] = "简单"; char message5[] = "困难"; char message6[] = "炼狱";
+    outtextxy(WIDTH - 180, 80, message4);
+    outtextxy(WIDTH - 180, 100, message5);
+    outtextxy(WIDTH - 180, 120, message6);
+}
+
+bool botton()
+{
+    if (msg.message == WM_LBUTTONDOWN)
+    {
+        if (msg.x >= WIDTH - 180 && msg.x <= WIDTH - 140 && msg.y >= 80 && msg.y <= 100) {
+            difficulty_level = 0;
+            return true;
+        }
+        if (msg.x >= WIDTH - 180 && msg.x <= WIDTH - 140 && msg.y > 100 && msg.y <= 120)
+        {
+            difficulty_level = 2;
+            return true;
+        }
+        if (msg.x >= WIDTH - 180 && msg.x <= WIDTH - 140 && msg.y > 120 && msg.y <= 140)
+        {
+            difficulty_level = 4;
+            return true;
+        }
+
+        return false;
+    }
+    return false;
+}
+
+int main() {
+    initgraph(WIDTH, HEIGHT);
+    Snake snake;
+
+    Wall wall(snake);  // 先创建墙
+
+    while (1) {
+        Food food(snake, wall);  // 创建食物，传入蛇和墙的信息
+        while (1) {
+            BeginBatchDraw();
+            while (peekmessage(&msg, EX_MOUSE))// 获取鼠标信息
+            {
+                if (botton()) break;// 判断鼠标点击处是否是按键
+            }
+            snake.Draw();
+            food.Draw();
+            initWall();
+            wall.Draw();
+            printMessage();
+            FlushBatchDraw();
+            EndBatchDraw();// 双缓冲，防止屏幕一闪一闪的
+            if (snake.Eat(food)) {
+                break;  // 吃到食物，重新生成食物
+            }
+            if (snake.Defeat(wall)) {
+                goto gameover;
+            }
+            snake.Move();
+        }
+    }
+gameover:
+    // 提示失败信息
+    HWND window = GetHWnd();
+    SetWindowText(window, _T("提示"));
+    MessageBox(window, _T("游戏失败"), _T("提示"), MB_OKCANCEL);
+    return 0;
+}
+
+// 蛇的初始化
+Snake::Snake()
+{
+    this->dirt = RIGHT;
+    this->length = 3;
+    // 下标是0的位置为蛇的头部
+    for (int i = 0; i < length; i++) {
+        this->node[i].x = 60 - ((i + 1) * SIZE);
+        this->node[i].y = 0;
+    }
+    loadimage(&ima1, "snakeHeadUp.png", SIZE, SIZE);
+    loadimage(&ima2, "snakeHeadDown.png", SIZE, SIZE);
+    loadimage(&ima3, "snakeHeadLeft.png", SIZE, SIZE);
+    loadimage(&ima4, "snakeHeadRight.png", SIZE, SIZE);
+    loadimage(&ima5, "snakeTail.png", SIZE, SIZE);
+}
+
+// 移动
+void Snake::Move() {
+    // 将原来的蛇结点拷贝一份
+    for (int i = 0; i < this->length; i++) {
+        tmp[i].x = this->node[i].x;
+        tmp[i].y = this->node[i].y;
+    }
+    int status = 0;// 用来判断是否点击了转向按键
+    if (this->dirt == RIGHT) {
+        // 判断是否转向
+        if (GetAsyncKeyState('W') && status == 0) {
+            this->dirt = UP;
+            status = 1;
+        }
+        else if (GetAsyncKeyState('S') && status == 0) {
+            this->dirt = DOWN;
+            status = 1;
+        }
+        else {
+            this->node[0].x += SIZE;
+        }
+    }
+    if (this->dirt == DOWN) {
+        // 判断是否转向
+        if (GetAsyncKeyState('A') && status == 0) {
+            this->dirt = LEFT;
+            status = 1;
+        }
+        else if (GetAsyncKeyState('D') && status == 0) {
+            this->dirt = RIGHT;
+            status = 1;
+        }
+        else {
+            this->node[0].y += SIZE;
+        }
+    }
+    if (this->dirt == LEFT) {
+        // 判断是否转向
+        if (GetAsyncKeyState('W') && status == 0) {
+            this->dirt = UP;
+            status = 1;
+        }
+        else if (GetAsyncKeyState('S') && status == 0) {
+            this->dirt = DOWN;
+            status = 1;
+        }
+        else {
+            this->node[0].x -= SIZE;
+        }
+    }
+    if (this->dirt == UP) {
+        // 判断是否转向
+        if (GetAsyncKeyState('A') && status == 0) {
+            this->dirt = LEFT;
+            status = 1;
+        }
+        else if (GetAsyncKeyState('D') && status == 0) {
+            this->dirt = RIGHT;
+            status = 1;
+        }
+        else {
+            this->node[0].y -= SIZE;
+        }
+    }
+    // 移动
+    for (int i = 1; i < this->length; i++) {
+        this->node[i].x = tmp[i - 1].x;
+        this->node[i].y = tmp[i - 1].y;
+    }
+    Sleep(speed);
+}
+
+// 绘制蛇
+void Snake::Draw() {
+    cleardevice();// 清空原先的绘图
+    for (int i = 0; i < this->length; i++) {
+        if (i == 0) {
+            if (this->dirt == UP) { putimage(this->node[i].x, this->node[i].y, &ima1); }
+            else if (this->dirt == DOWN) { putimage(this->node[i].x, this->node[i].y, &ima2); }
+            else if (this->dirt == LEFT) { putimage(this->node[i].x, this->node[i].y, &ima3); }
+            else { putimage(this->node[i].x, this->node[i].y, &ima4); }
+        }
+        else {
+            putimage(this->node[i].x, this->node[i].y, &ima5);
+        }
+    }
+}
+
+// 吃食物
+bool Snake::Eat(Food food) {
+    if (food.x == this->node[0].x && food.y == this->node[0].y) {
+        if (food.food_kind >= 9) {
+            if (speed > 20) speed -= 20;
+            score += 30;
+        }
+        else if (food.food_kind <= 2) { speed += 20; score += 10; }
+        else { score += 20; }
+
+        if (this->node[length - 1].x - this->node[length - 2].x == 0 && this->node[length - 1].y - this->node[length - 2].y == -20) {
+            this->length++;
+            this->node[length - 1].x = this->node[length - 2].x;
+            this->node[length - 1].y = this->node[length - 2].y - SIZE;
+        }
+        else if (this->node[length - 1].x - this->node[length - 2].x == 0 && this->node[length - 1].y - this->node[length - 2].y == 20) {
+            this->length++;
+            this->node[length - 1].x = this->node[length - 2].x;
+            this->node[length - 1].y = this->node[length - 2].y + SIZE;
+        }
+        else if (this->node[length - 1].x - this->node[length - 2].x == 20 && this->node[length - 1].y - this->node[length - 2].y == 0) {
+            this->length++;
+            this->node[length - 1].x = this->node[length - 2].x + SIZE;
+            this->node[length - 1].y = this->node[length - 2].y;
+        }
+        else {
+            this->length++;
+            this->node[length - 1].x = this->node[length - 2].x - SIZE;
+            this->node[length - 1].y = this->node[length - 2].y;
+        }
+
+        return true;
+    }
+    return false;
+}
+
+// 失败判定
+bool Snake::Defeat(Wall wall) {
+    // 1.碰到边界
+    if (this->node[0].x < 0 || this->node[0].x >= WIDTH - 280 || this->node[0].y < 0 || this->node[0].y >= HEIGHT) {
+        return true;
+    }
+    // 2.碰到自己的身体
+    for (int i = 1; i < this->length; i++) {
+        if (this->node[0].x == this->node[i].x && this->node[0].y == this->node[i].y) {
+            return true;
+        }
+    }
+    // 3.碰到障碍物
+    if (difficulty_level)
+    {
+        for (int i = 0; i < wall.num; i++) {
+            if (this->node[0].x == wall.wallnode[i].x && this->node[0].y == wall.wallnode[i].y) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// 迷宫生成算法
+void Wall::generateMaze() {
+    int cols = (WIDTH - 280) / SIZE;
+    int rows = HEIGHT / SIZE;
+    
+    // 确保迷宫尺寸为奇数
+    if (cols % 2 == 0) cols--;
+    if (rows % 2 == 0) rows--;
+    
+    // 初始化迷宫（所有格子都是墙）
+    vector<vector<bool>> maze(rows, vector<bool>(cols, true));
+    
+    // DFS生成迷宫
+    stack<SnakeNode> st;
+    SnakeNode start = { 1, 1 };  // 起点
+    maze[start.y][start.x] = false;
+    st.push(start);
+    
+    // 方向数组：上、右、下、左
+    int dx[4] = { 0, 1, 0, -1 };
+    int dy[4] = { -1, 0, 1, 0 };
+    
+    srand(static_cast<unsigned>(time(nullptr)));
+    
+    while (!st.empty()) {
+        SnakeNode current = st.top();
+        vector<int> directions = { 0, 1, 2, 3 };
+        shuffle(directions.begin(), directions.end(), default_random_engine(rand()));
+        
+        bool found = false;
+        for (int dir : directions) {
+            int nx = current.x + dx[dir] * 2;
+            int ny = current.y + dy[dir] * 2;
+            
+            if (nx > 0 && nx < cols - 1 && ny > 0 && ny < rows - 1 && maze[ny][nx]) {
+                // 打通当前格子与目标格子之间的墙
+                maze[current.y + dy[dir]][current.x + dx[dir]] = false;
+                maze[ny][nx] = false;
+                st.push({ nx, ny });
+                found = true;
+                break;
+            }
+        }
+        
+        if (!found) {
+            st.pop();  // 回溯
+        }
+    }
+    
+    // 将迷宫转换为墙的位置
+    num = 0;
+    for (int y = 0; y < rows; y++) {
+        for (int x = 0; x < cols; x++) {
+            if (maze[y][x] && num < MAXLEN) {
+                wallnode[num].x = x * SIZE;
+                wallnode[num].y = y * SIZE;
+                num++;
+            }
+        }
+    }
+}
+
+// 墙的初始化
+Wall::Wall(Snake snake) {
+    // 根据难度级别生成不同的障碍物
+    if (difficulty_level >= 4) {  // 炼狱难度：迷宫
+        generateMaze();
+    }
+    else if (difficulty_level >= 2) {  // 困难难度：随机障碍物
+        num = 50;  // 固定数量障碍物
+        srand(static_cast<unsigned>(time(nullptr)));
+        
+        for (int i = 0; i < num; i++) {
+        table3:
+            wallnode[i].x = (rand() % ((WIDTH - 280) / SIZE)) * SIZE;
+            wallnode[i].y = (rand() % (HEIGHT / SIZE)) * SIZE;
+            
+            // 避开蛇
+            for (int j = 0; j < snake.length; j++) {
+                if (snake.node[j].x == wallnode[i].x &&
+                    snake.node[j].y == wallnode[i].y) {
+                    goto table3;
+                }
+            }
+            
+            // 避免重复
+            for (int p = 0; p < i; p++) {
+                if (wallnode[p].x == wallnode[i].x &&
+                    wallnode[p].y == wallnode[i].y) {
+                    goto table3;
+                }
+            }
+        }
+    }
+    else {  // 简单难度：无障碍
+        num = 0;
+    }
+    
+    // 确保起点区域畅通
+    for (int i = 0; i < snake.length; i++) {
+        for (int j = 0; j < num; j++) {
+            if (snake.node[i].x == wallnode[j].x &&
+                snake.node[i].y == wallnode[j].y) {
+                // 移除阻挡蛇的障碍
+                for (int k = j; k < num - 1; k++) {
+                    wallnode[k] = wallnode[k + 1];
+                }
+                num--;
+                j--;
+            }
+        }
+    }
+}
+
+// 绘制障碍物
+void Wall::Draw()
+{
+    for (int i = 0; i < num; i++)
+    {
+        putimage(this->wallnode[i].x, this->wallnode[i].y, &wallImage);
+    }
+}
+
+// 食物的初始化
+Food::Food(Snake snake, Wall wall) {
+    loadimage(&foodImage, "china.png", SIZE, SIZE);
+    
+    // 最大尝试次数，避免无限循环
+    int maxAttempts = 100;
+    int attempts = 0;
+    bool validPosition = false;
+    
+    do {
+        attempts++;
+        if (attempts > maxAttempts) {
+            // 找不到合适位置，使用默认位置
+            this->x = 100;
+            this->y = 100;
+            break;
+        }
+        
+        this->x = (rand() % ((WIDTH - 280) / SIZE)) * SIZE;
+        this->y = (rand() % (HEIGHT / SIZE)) * SIZE;
+        
+        // 避开蛇
+        for (int i = 0; i < snake.length; i++) {
+            if (snake.node[i].x == this->x && snake.node[i].y == this->y) {
+                validPosition = false;
+                break;
+            }
+            else {
+                validPosition = true;
+            }
+        }
+        
+        if (!validPosition) continue;
+        
+        // 避开墙
+        for (int i = 0; i < wall.num; i++) {
+            if (wall.wallnode[i].x == this->x && wall.wallnode[i].y == this->y) {
+                validPosition = false;
+                break;
+            }
+        }
+        
+        if (validPosition) break;
+    } while (true);
+    
+    this->food_kind = rand() % 12 + 1;
+}
+
+// 绘制食物
+void Food::Draw() {
+    putimage(this->x, this->y, &foodImage);
+}
